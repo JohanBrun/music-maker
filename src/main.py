@@ -81,6 +81,6 @@ def main():
     noise1 = gen_binomial(0.6)
     chordStream = harmonize(noise1)
     # chordStream = gen_chords()
-    chordStream.show()
+    # chordStream.show()
 
 main()
