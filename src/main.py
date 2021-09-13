@@ -1,13 +1,15 @@
-from music21 import *
+from music21 import note, pitch, stream, key, chord
 from music21.key import KeySignature
 import numpy as np
 from numpy.random import default_rng
 
 rng = default_rng()
 
+
 def gen_binomial(p: float):
     noise = rng.binomial(127, p, 100)
     return noise
+
 
 def gen_normal(p: float):
     noise = rng.normal(1, p, 30)
@@ -15,12 +17,14 @@ def gen_normal(p: float):
     noise = np.rint(noise)
     return noise
 
+
 def note_from_noise(p: int, ks: KeySignature):
     n = note.Note(pitch.Pitch(p))
     nStep = n.pitch.step
     rightAccidental = ks.accidentalByStep(nStep)
     n.pitch.accidental = rightAccidental
     return n
+
 
 def gen_noises():
     noise1 = gen_normal(0.1)
@@ -30,6 +34,7 @@ def gen_noises():
     durations = rng.binomial(4, 0.5, 100)
     durations = durations / 2
     return noise1, noise2, noise3, durations
+
 
 def gen_chords():
     stream1 = stream.Stream()
@@ -50,12 +55,14 @@ def gen_chords():
 
     return stream1
 
+
 def get_triad(k: key.Key, degree: int) -> list[note.Note]:
     return [
         note.Note(k.pitchFromDegree(degree)),
         note.Note(k.pitchFromDegree(degree + 2)),
         note.Note(k.pitchFromDegree(degree + 4))
     ]
+
 
 def harmonize(noise):
     ks = key.KeySignature(rng.integers(-6, 6))
@@ -77,10 +84,12 @@ def harmonize(noise):
         stream1.append(chord.Chord(fourthTriad, quarterLength=2))
     return stream1
 
+
 def main():
     noise1 = gen_binomial(0.6)
     chordStream = harmonize(noise1)
-    # chordStream = gen_chords()
-    # chordStream.show()
+    chordStream = gen_chords()
+    chordStream.show()
+
 
 main()
