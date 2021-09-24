@@ -22,7 +22,7 @@ class ChordMap:
     def generateChord(self, chordName: str):
         return chord.Chord([
             note.Note(p) for p in self.k.pitchesFromScaleDegrees(self.chordDict[chordName][0])
-        ], quarterlength=2)
+        ], quarterLength=2)
     
     def getNextChord(self, chordName: str):
         return random.choice(self.chordDict[chordName][2])
@@ -35,8 +35,9 @@ class ChordMap:
             s.append(self.generateChord(currentChord))
             chordNum += 1
             currentChord = self.getNextChord(currentChord)
-
-        s.show('midi')
+            
+        s.append(self.generateChord(currentChord))
+        s.show()
 
 class Chord:
     extensions: list[str] = ['2', '6', 'M7', 'M9']
