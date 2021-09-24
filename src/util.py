@@ -11,7 +11,7 @@ def gen_normal(mu: float, sigma: float, length: int) -> np.array:
     sigma:  defines variance in noise
     length: defines amount of descrete noise values should be generated
     '''
-    inMidiRange = mu >= 0 and mu < 127 and length > 0
+    inMidiRange = mu >= 0 and mu <= 127 and length > 0
     if (inMidiRange):
         noise = rng.normal(mu, sigma, length)
         noise = noise
