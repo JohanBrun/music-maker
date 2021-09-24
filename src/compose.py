@@ -1,4 +1,4 @@
-from music21 import note, duration, key, meter, stream
+from music21 import note, duration, key, meter, stream, instrument
 import util
 
 
@@ -9,10 +9,9 @@ class Measure:
 
     def __init__(self) -> None:
         self.notes: note.Note = []
-        midiValues = util.gen_normal(60, 4, self.notesInMeasure)
+        midiValues = util.gen_normal(65, 3, self.notesInMeasure)
         durationValues = util.gen_normal(0, 1, self.notesInMeasure)
         for mv, dv in zip(midiValues, durationValues):
-            print(duration.Duration(2**dv))
             self.notes.append(util.note_from_noise(mv, self.ks))
             self.durations.append(duration.Duration(2**dv))
 
@@ -60,4 +59,5 @@ class Composition:
 
 c = Composition()
 s = c.compose()
+s.insert(instrument.Shamisen())
 s.show()
