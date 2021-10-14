@@ -3,20 +3,20 @@ import util
 
 
 class Measure:
-    durations: list[duration.Duration] = []
     notesInMeasure: int = 4
     ks: key.KeySignature = key.KeySignature(0)
 
     def __init__(self) -> None:
         self.notes: note.Note = []
-        midiValues = util.gen_normal(65, 3, self.notesInMeasure)
+        self.durations: list[duration.Duration] = []
+        midiValues = util.gen_normal(65, 2.25, self.notesInMeasure)
         durationValues = util.gen_normal(0, 1, self.notesInMeasure)
         for mv, dv in zip(midiValues, durationValues):
             self.notes.append(util.note_from_noise(mv, self.ks))
             self.durations.append(duration.Duration(2**dv))
 
     def getStream(self):
-        s = stream.Stream()
+        s = stream.Measure()
         for n, d in zip(self.notes, self.durations):
             n.duration = d
             s.append(n)
@@ -34,7 +34,7 @@ class Movement:
             self.measures.append(newMeasure)
 
     def getStream(self):
-        s = stream.Stream()
+        s = []
         for measure in self.measures:
             s.append(measure.getStream())
         return s
@@ -51,13 +51,15 @@ class Composition:
         self.movements = [firstMovement, secondMovement]
 
     def compose(self) -> stream.Stream:
-        s = stream.Stream()
+        part = []
         for movement in self.movements:
-            s.append(movement.getStream())
+        #   s.append(movement.getStream())
+            part += movement.getStream()
+        s = stream.Part(part)
         return s
 
 
 c = Composition()
 s = c.compose()
-s.insert(instrument.Shamisen())
 s.show()
+s.write('midi', '../melodi.midi')
