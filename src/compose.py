@@ -6,16 +6,21 @@ import util
 class Measure:
     ks: key.KeySignature = key.KeySignature(0)
     ts: meter.TimeSignature = meter.TimeSignature('4/4')
-    notesInMeasure = ts.numerator
+    beatsInMeasure = ts.numerator
 
-    def __init__(self, ) -> None:
+    def __init__(self) -> None:
         self.notes: note.Note = []
         self.durations: list[duration.Duration] = []
-        midiValues = util.gen_normal(65, 2.25, self.notesInMeasure)
-        durationValues = util.gen_normal(0, 1, self.notesInMeasure)
+        midiValues = util.gen_normal(65, 2.25, self.beatsInMeasure)
+        durationValues = util.gen_normal(0, 1, self.beatsInMeasure)
+        durationSum: float = 0.0
+
         for mv, dv in zip(midiValues, durationValues):
             self.notes.append(util.note_from_noise(mv, self.ks))
             self.durations.append(duration.Duration(2**dv))
+            durationSum += 2**dv
+            if (durationSum >= self.beatsInMeasure):
+                break
 
     def getStream(self):
         s = stream.Measure()
@@ -26,9 +31,9 @@ class Measure:
 
 
 class Movement():
-    numMeasures: int = 5
 
-    def __init__(self) -> None:
+    def __init__(self, numMeasures: int) -> None:
+        self.numMeasures = numMeasures
         self.measures: list[Measure] = []
         for i in range(self.numMeasures):
             newMeasure = Measure()
@@ -44,17 +49,16 @@ class Movement():
 class Composition():
     ts: meter.TimeSignature = meter.TimeSignature('4/4')
 
-    def __init__(self) -> None:
-        firstMovement = Movement()
-        secondMovement = Movement()
+    def __init__(self, numMeasures: int) -> None:
+        self.numMeasures = numMeasures
+        firstMovement = Movement(numMeasures // 2)
+        secondMovement = Movement(numMeasures // 2)
         self.movements = [firstMovement, secondMovement]
 
     def compose(self) -> stream.Stream:
         part = []
         for movement in self.movements:
-        #   s.append(movement.getStream())
             part += movement.getStream()
         s = stream.Part(part)
-        print(len(s.getElementsByClass(stream.Measure)))
         return s
 

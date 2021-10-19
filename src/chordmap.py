@@ -61,10 +61,9 @@ class ChordMap:
             currentChord = self.getNextChord(currentChord)
             measures.append(m)
 
+        measures.append(stream.Measure(self.generateChord(currentChord)))
         s = stream.Part(measures)
         s.keySignature = self.ks
         s.timeSignature = self.ts
-            
-        s.append(self.generateChord(currentChord))
         return s
  

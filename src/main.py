@@ -5,17 +5,23 @@ import compose, chordmap
 def main():
     keySignature = key.KeySignature(random.randint(-6, 6))
     timeSignature = meter.TimeSignature('4/4')
-    compose.Measure.ks = keySignature
-    composition = compose.Composition()
+    
     chordMap = chordmap.ChordMap(keySignature, timeSignature)
+    chords = chordMap.generateProgression()
+    numMeasures = len(chords.getElementsByClass(stream.Measure))
+
+    compose.Measure.ks = keySignature
+    composition = compose.Composition(numMeasures)
     
     s = stream.Score()
     s.keySignature = keySignature
     s.timeSignature = timeSignature
+
+
     s.append(composition.compose())
-    s.append(chordMap.generateProgression())
-    s.show()
+    s.append(chords)
     s.write('midi', '../composition.midi')
+    s.show()
     
 
 
