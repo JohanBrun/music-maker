@@ -1,9 +1,5 @@
 import random
-from numpy.random import default_rng
 from music21 import key, note, chord, stream, meter
-
-rng = default_rng()
-
 
 class ChordMap:
     chordDict: dict = {
@@ -15,12 +11,12 @@ class ChordMap:
         'vim': [[6, 1, 3], [10, 14], ['iim', 'IV']]
     }
 
-    def __init__(self) -> None:
-        self.ks = key.KeySignature(rng.integers(-6, 6))
+    def __init__(self, ks: key.KeySignature, ts: meter.TimeSignature) -> None:
+        self.ks = ks
         self.k = self.ks.asKey()
-        self.ts = meter.TimeSignature('3/4')
+        self.ts = ts
 
-    def addExtension(self, c: chord.Chord, extensions: list[str], p=0.3):
+    def addExtension(self, c: chord.Chord, extensions: list[str], p=0.1):
         extension = random.choice(extensions)
         if (random.uniform(0, 1) < p):
             if (extension == 'sus'):
@@ -49,25 +45,26 @@ class ChordMap:
     def getNextChord(self, chordName: str):
         return random.choice(self.chordDict[chordName][2])
 
-    def generateProgression(self):
-        s = stream.Stream()
-        s.keySignature = self.ks
-        s.timeSignature = self.ts
+    def generateProgression(self) -> stream.Part:
         currentChord = 'I'
         chordNum = 0
+        measures = []
         while(chordNum < 20 or currentChord != 'I'):
+            m = stream.Measure()
             newChord = self.generateChord(currentChord)
-            s.append(newChord)
+            m.append(newChord)
             chordNum += 1
             currentChord = self.getNextChord(currentChord)
+            newChord = self.generateChord(currentChord)
+            m.append(newChord)
+            chordNum += 1
+            currentChord = self.getNextChord(currentChord)
+            measures.append(m)
+
+        s = stream.Part(measures)
+        s.keySignature = self.ks
+        s.timeSignature = self.ts
             
         s.append(self.generateChord(currentChord))
-        s.show()
-        s.write('midi', '../akkorder.midi')
-
-class Chord:
-    extensions: list[str] = ['2', '6', 'M7', 'M9']
-    nextChords: list[str] = ['IV/I, V/I']
-
-cm = ChordMap()
-cm.generateProgression()
+        return s
+ 

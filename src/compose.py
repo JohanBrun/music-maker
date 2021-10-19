@@ -1,12 +1,14 @@
-from music21 import note, duration, key, meter, stream, instrument
+import random
+from music21 import note, duration, key, meter, stream
 import util
 
 
 class Measure:
-    notesInMeasure: int = 4
     ks: key.KeySignature = key.KeySignature(0)
+    ts: meter.TimeSignature = meter.TimeSignature('4/4')
+    notesInMeasure = ts.numerator
 
-    def __init__(self) -> None:
+    def __init__(self, ) -> None:
         self.notes: note.Note = []
         self.durations: list[duration.Duration] = []
         midiValues = util.gen_normal(65, 2.25, self.notesInMeasure)
@@ -23,8 +25,7 @@ class Measure:
         return s
 
 
-class Movement:
-    chordProgression: list[int]
+class Movement():
     numMeasures: int = 5
 
     def __init__(self) -> None:
@@ -40,10 +41,8 @@ class Movement:
         return s
 
 
-class Composition:
-    k: key.Key = key.Key('C')
+class Composition():
     ts: meter.TimeSignature = meter.TimeSignature('4/4')
-    tempo: int = 120
 
     def __init__(self) -> None:
         firstMovement = Movement()
@@ -56,10 +55,6 @@ class Composition:
         #   s.append(movement.getStream())
             part += movement.getStream()
         s = stream.Part(part)
+        print(len(s.getElementsByClass(stream.Measure)))
         return s
 
-
-c = Composition()
-s = c.compose()
-s.show()
-s.write('midi', '../melodi.midi')
