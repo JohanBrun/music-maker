@@ -15,7 +15,7 @@ def main():
     s.append(composition.compose())
     s.append(chordMap.generateProgression())
     s.show()
-    s.write('midi', 'composition.midi')
+    s.write('midi', '../composition.midi')
     
 
 
