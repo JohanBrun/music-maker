@@ -49,8 +49,10 @@ class Movement():
 class Composition():
     ts: meter.TimeSignature = meter.TimeSignature('4/4')
 
-    def __init__(self, numMeasures: int) -> None:
+    def __init__(self, numMeasures: int, ks: key.KeySignature, ts: meter.TimeSignature) -> None:
         self.numMeasures = numMeasures
+        self.ks = ks
+        self.ts = ts
         firstMovement = Movement(numMeasures // 2)
         secondMovement = Movement(numMeasures // 2)
         self.movements = [firstMovement, secondMovement]
@@ -60,5 +62,7 @@ class Composition():
         for movement in self.movements:
             part += movement.getStream()
         s = stream.Part(part)
+        s.keySignature = self.ks
+        s.timeSignature = self.ts
         return s
 
