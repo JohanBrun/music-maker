@@ -1,5 +1,5 @@
 import random
-from music21 import key, note, chord, stream, meter
+from music21 import duration, key, note, chord, stream, meter
 
 class ChordMap:
     chordDict: dict = {
@@ -66,4 +66,33 @@ class ChordMap:
         s.keySignature = self.ks
         s.timeSignature = self.ts
         return s
+
+    def generateRepeatableProgression(self) -> list[str]:
+        chordNum: int = 1
+        currentChord: str = 'I'
+        progression: list[str] = ['I']
+        while(chordNum < 4 or 'I' not in self.chordDict[currentChord][2]):
+            currentChord = self.getNextChord(currentChord)
+            progression.append(currentChord)
+            chordNum += 1
+
+        print(progression)
+        return progression
+
+    def generateChords(self, progression: list[str]) -> stream.Part:
+        measures: list[stream.Measure] = []
+        m = stream.Measure()
+        for chordName in progression:
+            if m.duration == duration.Duration(4):
+                measures.append(m)
+                m = stream.Measure()
+            m.append(self.generateChord(chordName))
+
+        measures.append(m)
+        s = stream.Part(measures)
+        s.keySignature = self.ks
+        s.timeSignature = self.ts
+        return s
+
+
  
