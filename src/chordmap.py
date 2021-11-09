@@ -45,28 +45,6 @@ class ChordMap:
     def getNextChord(self, chordName: str):
         return random.choice(self.chordDict[chordName][2])
 
-    def generateProgression(self) -> stream.Part:
-        currentChord = 'I'
-        chordNum = 0
-        measures = []
-        while(chordNum < 20 or currentChord != 'I'):
-            m = stream.Measure()
-            newChord = self.generateChord(currentChord)
-            m.append(newChord)
-            chordNum += 1
-            currentChord = self.getNextChord(currentChord)
-            newChord = self.generateChord(currentChord)
-            m.append(newChord)
-            chordNum += 1
-            currentChord = self.getNextChord(currentChord)
-            measures.append(m)
-
-        measures.append(stream.Measure(self.generateChord(currentChord)))
-        s = stream.Part(measures)
-        s.keySignature = self.ks
-        s.timeSignature = self.ts
-        return s
-
     def generateRepeatableProgression(self) -> list[str]:
         chordNum: int = 1
         currentChord: str = 'I'
@@ -80,6 +58,8 @@ class ChordMap:
         return progression
 
     def generateChords(self, progression: list[str]) -> stream.Part:
+        p = stream.Part()
+        p.id = 'Chords'
         measures: list[stream.Measure] = []
         m = stream.Measure()
         for chordName in progression:
@@ -89,10 +69,10 @@ class ChordMap:
             m.append(self.generateChord(chordName))
 
         measures.append(m)
-        s = stream.Part(measures)
-        s.keySignature = self.ks
-        s.timeSignature = self.ts
-        return s
+        p.append(measures)
+        p.keySignature = self.ks
+        p.timeSignature = self.ts
+        return p
 
 
  
