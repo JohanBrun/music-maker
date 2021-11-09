@@ -61,3 +61,39 @@ def harmonize(noise):
         stream1.append(chord.Chord(thirdTriad, quarterLength=2))
         stream1.append(chord.Chord(fourthTriad, quarterLength=2))
     return stream1
+
+def walkTest(self):
+    k = self.ks.asKey()
+    s = stream.Part()
+    s.keySignature = self.ks
+    s.timeSignature = self.ts
+
+    currentDegree = 1
+    direction = 0
+    ascendingWeights = [2, 3, 5, 10, 3, 10, 4, 1, 1]
+    descendingWeights = [1, 1, 4, 10, 3, 10, 5, 3, 2]
+    neutralWeights = [1, 1, 4, 10, 3, 10, 4, 1, 1]
+
+    currentNote = note.Note(k.pitchFromDegree(currentDegree))
+    
+    for i in range(self.numMeasures):
+        m = stream.Measure()
+        rythmSum = 4
+        while (rythmSum > 0):
+            if (direction == -1):
+                currentInterval, direction = self.getInterval(currentDegree, descendingWeights)
+            elif (direction == 1):
+                currentInterval, direction = self.getInterval(currentDegree, ascendingWeights)
+            else:
+                currentInterval, direction = self.getInterval(currentDegree, neutralWeights)
+            d, rythmSum = self.getDuration(rythmSum)
+            currentNote = note.Note(currentNote.pitch.midi + currentInterval)
+            currentNote.duration = duration.Duration(d)
+            currentDegree = k.getScaleDegreeFromPitch(currentNote.pitch, comparisonAttribute='pitchClass')
+            m.append(currentNote)
+
+            self.getIntervalFromWeightedGraph(currentDegree, currentInterval)
+
+        s.append(m)
+    
+    return s
