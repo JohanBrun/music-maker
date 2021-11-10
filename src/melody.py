@@ -3,10 +3,6 @@ import random
 import numpy as np
 from music21 import duration, key, meter, note, stream, tempo
 
-# -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7
-
-
-
 class MelodyGraph:
     intervalDict: dict = {
         1: [-7, -5, -3, -1, 0, 2, 4, 5, 7],
@@ -29,21 +25,21 @@ class MelodyGraph:
     }
 
     markovNoteWeights = np.array([
-        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.85, 0.85, 0.34, 0.17, 0.17, 0.1, 0.1], # -7
-        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.80, 0.80, 0.32, 0.16, 0.16, 0.1, 0.1], # -6
-        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.75, 0.75, 0.30, 0.15, 0.15, 0.1, 0.1], # -5
-        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.70, 0.70, 0.28, 0.14, 0.14, 0.1, 0.1], # -4
-        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.65, 0.65, 0.26, 0.13, 0.13, 0.1, 0.1], # -3
-        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.60, 0.60, 0.24, 0.12, 0.12, 0.1, 0.1], # -2
-        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.55, 0.55, 0.22, 0.11, 0.11, 0.1, 0.1], # -1
-        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.50, 0.50, 0.2, 0.1, 0.1, 0.1, 0.1], # 0
-        [0.1, 0.1, 0.11, 0.11, 0.22, 0.55, 0.55, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1], # 1
-        [0.1, 0.1, 0.12, 0.12, 0.24, 0.60, 0.60, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1], # 2
-        [0.1, 0.1, 0.13, 0.13, 0.26, 0.65, 0.65, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1], # 3
-        [0.1, 0.1, 0.14, 0.14, 0.28, 0.70, 0.70, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1], # 4
-        [0.1, 0.1, 0.15, 0.15, 0.30, 0.75, 0.75, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1], # 5
-        [0.1, 0.1, 0.16, 0.16, 0.32, 0.80, 0.80, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1], # 6
-        [0.1, 0.1, 0.17, 0.17, 0.34, 0.85, 0.85, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1], # 7
+        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.85, 0.85, 0.34, 0.17, 0.17, 0.1, 0.1],
+        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.80, 0.80, 0.32, 0.16, 0.16, 0.1, 0.1],
+        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.75, 0.75, 0.30, 0.15, 0.15, 0.1, 0.1],
+        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.70, 0.70, 0.28, 0.14, 0.14, 0.1, 0.1],
+        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.65, 0.65, 0.26, 0.13, 0.13, 0.1, 0.1],
+        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.60, 0.60, 0.24, 0.12, 0.12, 0.1, 0.1],
+        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.55, 0.55, 0.22, 0.11, 0.11, 0.1, 0.1],
+        [0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 0.5, 0.1, 0.50, 0.50, 0.2, 0.1, 0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.11, 0.11, 0.22, 0.55, 0.55, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.12, 0.12, 0.24, 0.60, 0.60, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.13, 0.13, 0.26, 0.65, 0.65, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.14, 0.14, 0.28, 0.70, 0.70, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.15, 0.15, 0.30, 0.75, 0.75, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.16, 0.16, 0.32, 0.80, 0.80, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.17, 0.17, 0.34, 0.85, 0.85, 0.1, 0.5, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1],
     ])
 
     durations = [1, 0.5, 2, 1.5, 0.75]
@@ -58,10 +54,10 @@ class MelodyGraph:
         k = self.ks.asKey()
         p = stream.Part()
         p.keySignature = self.ks
-        p.timeSignature = self.ts
+        # p.timeSignature = self.ts
         p.id = 'melody'
 
-        mm = tempo.MetronomeMark(180)
+        mm = tempo.MetronomeMark(120)
         
         currentDegree = 1
         currentInterval = 0
@@ -81,13 +77,40 @@ class MelodyGraph:
             p.append(m)
         return p
 
+    def repeatableMarkovMelody(self):
+        k = self.ks.asKey()
+        midiValues = []
+        durationValues = []
 
-    def getInterval(self, currentDegree, weights):
-        choices = []
-        for interval, weight in zip(self.intervalDict[currentDegree], weights):
-            choices += [interval] * weight
-        c = random.choice(choices)
-        return c, np.sign(c)
+        currentDegree = 1
+        currentInterval = 0
+        currentNote = note.Note(k.pitchFromDegree(currentDegree))
+        currentMidi = currentNote.pitch.midi
+        
+        rythmSum = self.ts.numerator * self.numMeasures
+        while (rythmSum > 0):
+            currentInterval = self.getIntervalFromWeightedGraph(currentDegree, currentInterval, currentNote)
+            d, rythmSum = self.getDuration(rythmSum)
+
+            currentMidi = currentMidi + currentInterval
+            currentNote = note.Note(currentMidi)
+            currentDegree = k.getScaleDegreeFromPitch(currentNote.pitch, comparisonAttribute='pitchClass')
+
+            midiValues.append(currentMidi)
+            durationValues.append(d)
+        return midiValues, durationValues
+
+    def generateNotes(self, midiValues, durationsValues):
+        assert len(midiValues) == len(durationsValues)
+        s = stream.Stream()
+        s.keySignature = self.ks
+        s.timeSignature = self.ts
+        for midi, d in zip(midiValues, durationsValues):
+            n = note.Note(midi)
+            n.duration = duration.Duration(d)
+            s.append(n)
+        return s
+
 
     def getIntervalFromWeightedGraph(self, currentDegree: int, currentInterval: int, currentNote: note.Note):
         intervalIndex = currentInterval + 7

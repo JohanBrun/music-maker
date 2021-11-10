@@ -31,7 +31,6 @@ class Measure:
 
 
 class Movement():
-
     def __init__(self, numMeasures: int) -> None:
         self.numMeasures = numMeasures
         self.measures: list[Measure] = []

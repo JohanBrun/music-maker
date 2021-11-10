@@ -53,13 +53,11 @@ class ChordMap:
             currentChord = self.getNextChord(currentChord)
             progression.append(currentChord)
             chordNum += 1
-
-        print(progression)
         return progression
 
-    def generateChords(self, progression: list[str]) -> stream.Part:
-        p = stream.Part()
-        p.id = 'Chords'
+    def generateChords(self, progression: list[str]) -> stream.Stream:
+        s = stream.Stream()
+        s.id = 'Chords'
         measures: list[stream.Measure] = []
         m = stream.Measure()
         for chordName in progression:
@@ -69,10 +67,10 @@ class ChordMap:
             m.append(self.generateChord(chordName))
 
         measures.append(m)
-        p.append(measures)
-        p.keySignature = self.ks
-        p.timeSignature = self.ts
-        return p
+        s.append(measures)
+        s.keySignature = self.ks
+        s.timeSignature = self.ts
+        return s
 
 
  
