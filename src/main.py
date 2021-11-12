@@ -1,7 +1,7 @@
 from copy import copy
 import random, copy
 from music21 import key, meter, stream
-import chordmap, melody
+import chordmap, melody, clave
 
 def main():
     # Current metamodel info
@@ -16,7 +16,7 @@ def main():
     generatedChords = chordMap.generateChords(progression)
     numMeasures = len(generatedChords.getElementsByClass(stream.Measure))
 
-    # generating melody
+    # Generating melody
     mg = melody.MelodyGraph(numMeasures // 4, keySignature, timeSignature)
     # generatedMelody = mg.markovMelody()
     midiValues, durationValues = mg.repeatableMarkovMelody()
@@ -25,10 +25,13 @@ def main():
     durationValues += durationValues
     durationValues += durationValues
     generatedMelody = mg.generateNotes(midiValues, durationValues)
-    #    generatedMelody.show()
+
+    # Generating clave
+    cg = clave.ClaveGenerator(numMeasures)
+    generatedClave = cg.generate23Clave()
 
     # Putting together parts and storing generated midi file
-    s = stream.Score([generatedMelody, generatedChords])
+    s = stream.Score([generatedMelody, generatedChords, generatedClave])
     s.write('midi', '../composition.midi')
     s.show()
     
