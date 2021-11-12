@@ -3,7 +3,7 @@ from music21 import duration, key, note, chord, stream, meter
 
 class ChordMap:
     chordDict: dict = {
-        'I': [[1, 3, 5], [2, 9, 11, 14, 'sus'], ['iim', 'iiim', 'IV', 'V', 'vim']],
+        'I': [[1, 3, 5], [9, 11, 14, 'sus'], ['iim', 'iiim', 'IV', 'V', 'vim']],
         'iim': [[2, 4, 6], [10, 14], ['I', 'iiim', 'V']],
         'iiim': [[3, 5, 7], [10], ['I', 'IV', 'vim']],
         'IV': [[4, 6, 8], [9, 11, 'm', 8], ['I', 'iim', 'V']],
@@ -16,7 +16,7 @@ class ChordMap:
         self.k = self.ks.asKey()
         self.ts = ts
 
-    def addExtension(self, c: chord.Chord, extensions: list[str], p=0.1):
+    def addExtension(self, c: chord.Chord, extensions: list[str], p=0.5):
         extension = random.choice(extensions)
         if (random.uniform(0, 1) < p):
             if (extension == 'sus'):
@@ -31,7 +31,6 @@ class ChordMap:
                 c.add(note.Note(c.getChordStep(1).midi + extension))
         return c
             
-
     def generateChord(self, chordName: str):
         c = chord.Chord([
             note.Note(p) for p in self.k.pitchesFromScaleDegrees(self.chordDict[chordName][0])
@@ -46,13 +45,13 @@ class ChordMap:
         return random.choice(self.chordDict[chordName][2])
 
     def generateRepeatableProgression(self) -> list[str]:
-        chordNum: int = 1
-        currentChord: str = 'I'
-        progression: list[str] = ['I']
-        while(chordNum < 4 or 'I' not in self.chordDict[currentChord][2]):
+        initialChord = random.choice(['I', 'iim', 'iiim', 'IV', 'V', 'vim'])
+        currentChord = initialChord
+        progression: list[str] = [initialChord]
+        # while(len(progression) < 4 or initialChord not in self.chordDict[currentChord][2]):
+        while(len(progression) < 4):
             currentChord = self.getNextChord(currentChord)
             progression.append(currentChord)
-            chordNum += 1
         return progression
 
     def generateChords(self, progression: list[str]) -> stream.Stream:
