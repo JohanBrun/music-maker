@@ -1,7 +1,7 @@
 from math import ceil
 import random
 import numpy as np
-from music21 import duration, key, meter, note, stream, tempo
+from music21 import duration, dynamics, key, meter, note, stream, tempo
 
 class MelodyGraph:
     intervalDict: dict = {
@@ -77,10 +77,10 @@ class MelodyGraph:
             p.append(m)
         return p
 
-    def repeatableMarkovMelody(self):
+    def repeatableMarkovMelody(self) -> tuple[list[int], list[int]]:
         k = self.ks.asKey()
-        midiValues = []
-        durationValues = []
+        midiValues: list[int] = []
+        durationValues: list[int] = []
 
         currentDegree = 1
         currentInterval = 0
@@ -100,19 +100,21 @@ class MelodyGraph:
             durationValues.append(d)
         return midiValues, durationValues
 
-    def generateNotes(self, midiValues, durationsValues):
+    def generateNotesFromMidi(self, midiValues: list[int], durationsValues: list[int], numMeasures: int) -> stream.Stream:
         assert len(midiValues) == len(durationsValues)
         s = stream.Stream()
         s.keySignature = self.ks
         s.timeSignature = self.ts
-        for midi, d in zip(midiValues, durationsValues):
-            n = note.Note(midi)
-            n.duration = duration.Duration(d)
-            s.append(n)
+        s.insert(0, dynamics.Dynamic(0.75))
+        while (s.duration.quarterLength < numMeasures * self.ts.numerator):
+            for midi, d in zip(midiValues, durationsValues):
+                n = note.Note(midi)
+                n.duration = duration.Duration(d)
+                s.append(n)
         return s
 
 
-    def getIntervalFromWeightedGraph(self, currentDegree: int, currentInterval: int, currentNote: note.Note):
+    def getIntervalFromWeightedGraph(self, currentDegree: int, currentInterval: int, currentNote: note.Note) -> int:
         intervalIndex = currentInterval + 7
         mask = self.degreeStateDict[currentDegree] > 0
         currentWeights = self.markovNoteWeights[intervalIndex][mask]
@@ -122,18 +124,15 @@ class MelodyGraph:
             weights=currentWeights[lowerCutOff:upperCutOff]
         )[0] # Choices returns a list even when it only chooses one element, therefore index 0 to extract from the list
 
-    def getCutOff(self, currentNote):
+    def getCutOff(self, currentNote) -> tuple[int, int]:
         lower = 0
         upper = 9
         if (currentNote.pitch.midi < 57): lower = 4
         if (currentNote.pitch.midi > 87): upper = 5
         return lower, upper
 
-    def getDuration(self, sum: int):
-        choices = []
-        for d, w in zip(self.durations, self.durationsWeights):
-            choices += [d] * w
-        c = random.choice(choices)
+    def getDuration(self, sum: int) -> tuple[float, float]:
+        c = random.choices(population=self.durations, weights=self.durationsWeights)[0]
         sum -= c
         if sum < 0:
             c += sum

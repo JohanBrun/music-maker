@@ -1,5 +1,6 @@
 import random
-from music21 import duration, key, note, chord, stream, meter
+from types import DynamicClassAttribute
+from music21 import duration, key, note, chord, stream, meter, dynamics
 
 class ChordMap:
     chordDict: dict = {
@@ -11,12 +12,14 @@ class ChordMap:
         'vim': [[6, 1, 3], [10, 14], ['iim', 'IV']]
     }
 
+    chordRythms = [[1, 1, 1, 1], [2, 2, 2, 2], [2, 1.5, 1.5, 3]]
+
     def __init__(self, ks: key.KeySignature, ts: meter.TimeSignature) -> None:
         self.ks = ks
         self.k = self.ks.asKey()
         self.ts = ts
 
-    def addExtension(self, c: chord.Chord, extensions: list[str], p=0.5):
+    def addExtension(self, c: chord.Chord, extensions: list[str], p=0.0) -> chord.Chord:
         extension = random.choice(extensions)
         if (random.uniform(0, 1) < p):
             if (extension == 'sus'):
@@ -31,17 +34,17 @@ class ChordMap:
                 c.add(note.Note(c.getChordStep(1).midi + extension))
         return c
             
-    def generateChord(self, chordName: str):
+    def generateChord(self, chordName: str, quarterLength: int) -> chord.Chord:
         c = chord.Chord([
             note.Note(p) for p in self.k.pitchesFromScaleDegrees(self.chordDict[chordName][0])
-        ], quarterLength=2)
+        ], quarterLength=quarterLength)
         bassNote = note.Note(c.getChordStep(1).midi - 12)
         c.add(bassNote)
         c.insertLyric(chordName)
         c = self.addExtension(c, self.chordDict[chordName][1])
         return c
     
-    def getNextChord(self, chordName: str):
+    def getNextChord(self, chordName: str) -> str:
         return random.choice(self.chordDict[chordName][2])
 
     def generateRepeatableProgression(self) -> list[str]:
@@ -54,22 +57,15 @@ class ChordMap:
             progression.append(currentChord)
         return progression
 
-    def generateChords(self, progression: list[str]) -> stream.Stream:
+    def generateChords(self, progression: list[str], numMeasures: int) -> stream.Stream:
         s = stream.Stream()
         s.id = 'Chords'
-        measures: list[stream.Measure] = []
-        m = stream.Measure()
-        for chordName in progression:
-            if m.duration == duration.Duration(4):
-                measures.append(m)
-                m = stream.Measure()
-            m.append(self.generateChord(chordName))
+        s.insert(0, dynamics.Dynamic(0.5))
+        quarterLengths = random.choice(self.chordRythms)
+        while s.duration.quarterLength < numMeasures * self.ts.numerator:
+            for chordName, ql in zip(progression, quarterLengths):
+                s.append(self.generateChord(chordName, ql))
 
-        measures.append(m)
-        s.append(measures)
         s.keySignature = self.ks
         s.timeSignature = self.ts
         return s
-
-
- 

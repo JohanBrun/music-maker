@@ -1,16 +1,16 @@
-from music21 import pitch, stream, note, instrument, duration, midi, tempo
+from music21 import stream, note, instrument
 
 class ClaveGenerator:
-    def __init__(self, numMeasures: int) -> None:
-        self.numMeasures = numMeasures
+    def __init__(self) -> None:
+        pass
 
-    def generate23Clave(self):
+    def generate23Clave(self, numMeasures: int):
         s = stream.Stream()
         s.insert(instrument.Woodblock())
         # mm = tempo.MetronomeMark(number=240)
         # s.append(mm)
 
-        for i in range(self.numMeasures):
+        for i in range(numMeasures):
             quarterClave1 = note.Note(77, quarterLength=0.5)
             quarterClave2 = note.Note(77, quarterLength=0.5)
             quarterClave3 = note.Note(77, quarterLength=0.5)

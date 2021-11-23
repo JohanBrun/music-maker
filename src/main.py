@@ -7,32 +7,25 @@ def main():
     # Current metamodel info
     keySignature = key.KeySignature(random.randint(-6, 6))
     timeSignature = meter.TimeSignature('4/4')
+    numMeasures = 8
     
     # Generating chords
     chordMap = chordmap.ChordMap(keySignature, timeSignature)
     progression = chordMap.generateRepeatableProgression()
-    progression += progression
-    progression += progression
-    generatedChords = chordMap.generateChords(progression)
-    numMeasures = len(generatedChords.getElementsByClass(stream.Measure))
+    generatedChords = chordMap.generateChords(progression, numMeasures)
 
     # Generating melody
     mg = melody.MelodyGraph(numMeasures // 4, keySignature, timeSignature)
-    # generatedMelody = mg.markovMelody()
     midiValues, durationValues = mg.repeatableMarkovMelody()
-    midiValues += midiValues
-    midiValues += midiValues
-    durationValues += durationValues
-    durationValues += durationValues
-    generatedMelody = mg.generateNotes(midiValues, durationValues)
+    generatedMelody = mg.generateNotesFromMidi(midiValues, durationValues, numMeasures)
 
     # Generating clave
-    cg = clave.ClaveGenerator(numMeasures)
-    generatedClave = cg.generate23Clave()
+    # cg = clave.ClaveGenerator()
+    # generatedClave = cg.generate23Clave(numMeasures)
 
     # Putting together parts and storing generated midi file
-    s = stream.Score([generatedMelody, generatedChords, generatedClave])
-    s.write('midi', '../composition.midi')
+    s = stream.Score([generatedMelody, generatedChords])
+    s.write('midi', '../composition.mid')
     s.show()
     
 
