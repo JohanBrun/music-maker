@@ -1,7 +1,7 @@
 from math import ceil
 import random
 import numpy as np
-from music21 import duration, dynamics, key, meter, note, stream, tempo
+from music21 import duration, dynamics, key, meter, note, pitch, stream, tempo
 
 class MelodyGraph:
     intervalDict: dict = {
@@ -89,12 +89,11 @@ class MelodyGraph:
         
         rythmSum = self.ts.numerator * self.numMeasures
         while (rythmSum > 0):
-            currentInterval = self.getIntervalFromWeightedGraph(currentDegree, currentInterval, currentNote)
+            currentInterval = self.getIntervalFromWeightedGraph(currentDegree, currentInterval, currentMidi)
             d, rythmSum = self.getDuration(rythmSum)
 
             currentMidi = currentMidi + currentInterval
-            currentNote = note.Note(currentMidi)
-            currentDegree = k.getScaleDegreeFromPitch(currentNote.pitch, comparisonAttribute='pitchClass')
+            currentDegree = k.getScaleDegreeFromPitch(pitch.Pitch(currentMidi), comparisonAttribute='pitchClass')
 
             midiValues.append(currentMidi)
             durationValues.append(d)
@@ -113,22 +112,37 @@ class MelodyGraph:
                 s.append(n)
         return s
 
+    def interpolateMelody(self, midiValues: list[int]):
+        k = self.ks.asKey()
+        interpolated = []
+        currentInterval = 0
+        for m in midiValues:
+            interpolated.append(m)
+            currentMidi = m
+            for i in range(3):
+                currentDegree = k.getScaleDegreeFromPitch(pitch.Pitch(currentMidi), comparisonAttribute='pitchClass')
+                currentInterval = self.getIntervalFromWeightedGraph(currentDegree, currentInterval, currentMidi)
+                currentMidi = currentMidi + currentInterval
+                interpolated.append(currentMidi)
+                
+            
 
-    def getIntervalFromWeightedGraph(self, currentDegree: int, currentInterval: int, currentNote: note.Note) -> int:
+
+    def getIntervalFromWeightedGraph(self, currentDegree: int, currentInterval: int, currentMidi: int) -> int:
         intervalIndex = currentInterval + 7
         mask = self.degreeStateDict[currentDegree] > 0
         currentWeights = self.markovNoteWeights[intervalIndex][mask]
-        lowerCutOff, upperCutOff = self.getCutOff(currentNote)
+        lowerCutOff, upperCutOff = self.getCutOff(currentMidi)
         return random.choices(
             population=self.intervalDict[currentDegree][lowerCutOff:upperCutOff],
             weights=currentWeights[lowerCutOff:upperCutOff]
         )[0] # Choices returns a list even when it only chooses one element, therefore index 0 to extract from the list
 
-    def getCutOff(self, currentNote) -> tuple[int, int]:
+    def getCutOff(self, currentMidi) -> tuple[int, int]:
         lower = 0
         upper = 9
-        if (currentNote.pitch.midi < 57): lower = 4
-        if (currentNote.pitch.midi > 87): upper = 5
+        if (currentMidi < 57): lower = 4
+        if (currentMidi > 87): upper = 5
         return lower, upper
 
     def getDuration(self, sum: int) -> tuple[float, float]:

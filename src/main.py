@@ -1,5 +1,5 @@
 from copy import copy
-import random, copy
+import random
 from music21 import key, meter, stream
 import chordmap, melody, clave
 
