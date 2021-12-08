@@ -12,7 +12,8 @@ class ChordMap:
         'vim': [[6, 1, 3], [10, 14], ['iim', 'IV']]
     }
 
-    chordRythms = [[1, 1, 1, 1], [2, 2, 2, 2], [2, 1.5, 1.5, 3]]
+    chordRythms = [[1, 1, 1, 1], [2, 2, 2, 2], [4, 4, 4, 4]]
+    chordRythms = [[4, 4, 4, 4]]
 
     def __init__(self, ks: key.KeySignature, ts: meter.TimeSignature) -> None:
         self.ks = ks
@@ -35,11 +36,16 @@ class ChordMap:
         return c
             
     def generateChord(self, chordName: str, quarterLength: int) -> chord.Chord:
-        c = chord.Chord([
-            note.Note(p) for p in self.k.pitchesFromScaleDegrees(self.chordDict[chordName][0])
-        ], quarterLength=quarterLength)
-        bassNote = note.Note(c.getChordStep(1).midi - 12)
-        c.add(bassNote)
+        notesInChord = []
+        bottomNote = True
+        for p in self.k.pitchesFromScaleDegrees(self.chordDict[chordName][0]):
+            n = note.Note(p)
+            n.octave = 3 if bottomNote else 4
+            bottomNote = False
+            notesInChord.append(n)
+        c = chord.Chord(notesInChord, quarterLength=quarterLength)
+        # bassNote = note.Note(c.getChordStep(1).midi - 12)
+        # c.add(bassNote)
         c.insertLyric(chordName)
         c = self.addExtension(c, self.chordDict[chordName][1])
         return c

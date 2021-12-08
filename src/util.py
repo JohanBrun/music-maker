@@ -22,8 +22,8 @@ def gen_normal(mu: float, sigma: float, length: int) -> np.array:
         return np.array([])
 
 
-def note_from_noise(p: int, ks: key.KeySignature):
-    n = note.Note(pitch.Pitch(p))
+def noteInKeyFromMidiValue(midiValue: int, ks: key.KeySignature):
+    n = note.Note(midiValue)
     nStep = n.pitch.step
     rightAccidental = ks.accidentalByStep(nStep)
     n.pitch.accidental = rightAccidental
