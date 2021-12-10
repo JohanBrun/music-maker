@@ -1,6 +1,5 @@
 from math import ceil
 import random
-import numpy as np
 import util
 from music21 import duration, dynamics, key, meter, note, pitch, stream, tempo
 
@@ -15,7 +14,7 @@ class MelodyGraph:
         7: [-7, -6, -4, -2, 0, 1, 3, 5, 6],
     }
 
-    markovIntervalWeights = np.array([
+    markovIntervalWeights = [
         [0.1, 0.10, 0.20, 0.50, 0.05, 0.85, 0.34, 0.10, 0.1],
         [0.1, 0.10, 0.20, 0.50, 0.05, 0.70, 0.28, 0.10, 0.1],
         [0.1, 0.10, 0.20, 0.50, 0.05, 0.60, 0.24, 0.10, 0.1],
@@ -25,7 +24,7 @@ class MelodyGraph:
         [0.1, 0.10, 0.24, 0.60, 0.05, 0.50, 0.20, 0.10, 0.1],
         [0.1, 0.10, 0.28, 0.70, 0.05, 0.50, 0.20, 0.10, 0.1],
         [0.1, 0.10, 0.34, 0.85, 0.05, 0.50, 0.20, 0.10, 0.1],
-    ])
+    ]
 
     durationsValues = [1, 0.5, 2, 1.5]
     durationsValuesWeights = [8, 2, 2, 1]

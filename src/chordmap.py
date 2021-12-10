@@ -1,6 +1,5 @@
 import random
-from types import DynamicClassAttribute
-from music21 import duration, key, note, chord, stream, meter, dynamics
+from music21 import key, note, chord, stream, meter, dynamics
 
 class ChordMap:
     chordDict: dict = {
@@ -12,8 +11,8 @@ class ChordMap:
         'vim': [[6, 1, 3], [10, 14], ['iim', 'IV']]
     }
 
-    chordRythms = [[1, 1, 1, 1], [2, 2, 2, 2], [4, 4, 4, 4]]
-    chordRythms = [[4, 4, 4, 4]]
+    chordRythms = [[2, 2, 2, 2], [4, 4, 4, 4]]
+    # chordRythms = [[4, 4, 4, 4]]
 
     def __init__(self, ks: key.KeySignature, ts: meter.TimeSignature) -> None:
         self.ks = ks
