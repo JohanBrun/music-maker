@@ -1,7 +1,7 @@
 import random
 from music21 import key, note, chord, stream, meter, dynamics
 
-class ChordMap:
+class ChordGraph:
     chordDict: dict = {
         'I': [[1, 3, 5], [9, 11, 14, 'sus'], ['iim', 'iiim', 'IV', 'V', 'vim']],
         'iim': [[2, 4, 6], [10, 14], ['I', 'iiim', 'V']],

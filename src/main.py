@@ -1,6 +1,8 @@
 import random
 from music21 import key, meter, stream
-import chordmap, melody, util
+import util
+from melody import MelodyGraph
+from chord_progression import ChordGraph
 def main():
     # Current metamodel info
     keySignature = key.KeySignature(random.randint(-6, 6))
@@ -8,12 +10,12 @@ def main():
     numMeasures = 12
     
     # Generating chords
-    chordMap = chordmap.ChordMap(keySignature, timeSignature)
+    chordMap = ChordGraph(keySignature, timeSignature)
     progression = chordMap.generateRepeatableProgression()
     generatedChords = chordMap.generateChords(progression, numMeasures)
 
     # Generating melody
-    mg = melody.MelodyGraph(numMeasures, keySignature, timeSignature)
+    mg = MelodyGraph(numMeasures, keySignature, timeSignature)
     midiValues, durationValues = mg.generateMidiValuesFromMarkovModel()
     generatedMelody = mg.generateNotesFromMidi(midiValues, durationValues, numMeasures)
 
