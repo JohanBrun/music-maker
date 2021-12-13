@@ -4,19 +4,19 @@ import util
 from melody import MelodyGraph
 from chord_progression import ChordGraph
 def main():
-    # Current metamodel info
-    keySignature = key.KeySignature(random.randint(-6, 6))
+    # Initializing key parameters
+    keySignature = key.KeySignature(random.randint(-5, 5))
     timeSignature = meter.TimeSignature('4/4')
     numMeasures = 12
     
     # Generating chords
-    chordMap = ChordGraph(keySignature, timeSignature)
-    progression = chordMap.generateRepeatableProgression()
-    generatedChords = chordMap.generateChords(progression, numMeasures)
+    cg = ChordGraph(keySignature, timeSignature)
+    progression = cg.generateFourChordProgression()
+    generatedChords = cg.generateChords(progression, numMeasures)
 
     # Generating melody
-    mg = MelodyGraph(numMeasures, keySignature, timeSignature)
-    midiValues, durationValues = mg.generateMidiValuesFromMarkovModel()
+    mg = MelodyGraph(keySignature, timeSignature)
+    midiValues, durationValues = mg.generateMidiValuesFromMarkovModel(numMeasures)
     generatedMelody = mg.generateNotesFromMidi(midiValues, durationValues, numMeasures)
 
     # Alternative melody

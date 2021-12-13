@@ -4,7 +4,7 @@ import util
 from music21 import duration, dynamics, key, meter, note, pitch, stream, tempo
 
 class MelodyGraph:
-    intervalDict: dict = {
+    degreeToIntervalsDict: dict = {
         1: [-7, -5, -3, -1, 0, 2, 4, 5, 7],
         2: [-7, -5, -3, -2, 0, 2, 3, 5, 7],
         3: [-7, -5, -4, -2, 0, 1, 3, 5, 7],
@@ -12,6 +12,11 @@ class MelodyGraph:
         5: [-7, -5, -3, -2, 0, 2, 4, 5, 7],
         6: [-7, -5, -4, -2, 0, 2, 3, 5, 7],
         7: [-7, -6, -4, -2, 0, 1, 3, 5, 6],
+    }
+
+    indexDict: dict = {
+        -7: 0, -6: 1, -5: 1, -4: 2, -3: 2, -2: 3, -1: 3,
+        0: 4, 1: 5, 2: 5, 3: 6, 4: 6, 5: 7, 6: 7, 7: 8
     }
 
     markovIntervalWeights = [
@@ -29,12 +34,11 @@ class MelodyGraph:
     durationsValues = [1, 0.5, 2, 1.5]
     durationsValuesWeights = [8, 2, 2, 1]
 
-    def __init__(self, numMeasures: int, ks: key.KeySignature, ts: meter.TimeSignature) -> None:
-        self.numMeasures = numMeasures
+    def __init__(self, ks: key.KeySignature, ts: meter.TimeSignature) -> None:
         self.ks = ks
         self.ts = ts
 
-    def generateMidiValuesFromMarkovModel(self) -> tuple[list[int], list[int]]:
+    def generateMidiValuesFromMarkovModel(self, numMeasures) -> tuple[list[int], list[int]]:
         k = self.ks.asKey()
         midiValues: list[int] = []
         durationValues: list[int] = []
@@ -44,7 +48,7 @@ class MelodyGraph:
         currentNote = note.Note(k.pitchFromDegree(currentDegree))
         currentMidi = currentNote.pitch.midi
         
-        rythmSum = self.ts.numerator * self.numMeasures
+        rythmSum = self.ts.numerator * numMeasures
         while (rythmSum > 0):
             currentInterval = self.getIntervalFromWeightedGraph(currentDegree, currentInterval, currentMidi)
             d, rythmSum = self.getDuration(rythmSum)
@@ -53,7 +57,7 @@ class MelodyGraph:
             currentDegree = k.getScaleDegreeFromPitch(pitch.Pitch(currentMidi), comparisonAttribute='pitchClass')
 
             midiValues.append(currentMidi)
-            durationValues.append(d)
+            durationValues.append(1)
         return midiValues, durationValues
 
     def generateNotesFromMidi(self, midiValues: list[int], durationsValuesValues: list[int], numMeasures: int) -> stream.Stream:
@@ -74,25 +78,29 @@ class MelodyGraph:
         interpolatedMidiValues = []
         durationsValues = []
         currentInterval = 0
+
         for m in midiValues:
             interpolatedMidiValues.append(m)
             durationsValues.append(1)
             currentMidi = m
+
             for i in range(interpolationRate-1):
                 currentDegree = k.getScaleDegreeFromPitch(pitch.Pitch(currentMidi), comparisonAttribute='pitchClass')
                 currentInterval = self.getIntervalFromWeightedGraph(currentDegree, currentInterval, currentMidi)
                 currentMidi = currentMidi + currentInterval
                 interpolatedMidiValues.append(currentMidi)
                 durationsValues.append(1)
+                
         return interpolatedMidiValues, durationsValues
             
     def getIntervalFromWeightedGraph(self, currentDegree: int, currentInterval: int, currentMidi: int) -> int:
-        currentWeights = self.markovIntervalWeights[currentDegree]
+        weightIndex = self.indexDict[currentInterval]
+        currentWeights = self.markovIntervalWeights[weightIndex]
         lowerCutOff, upperCutOff = self.getCutOff(currentMidi)
         return random.choices(
-            population=self.intervalDict[currentDegree][lowerCutOff:upperCutOff],
+            population=self.degreeToIntervalsDict[currentDegree][lowerCutOff:upperCutOff],
             weights=currentWeights[lowerCutOff:upperCutOff]
-        )[0] # Choices returns a list even when it only chooses one element, therefore index 0 to extract from the list
+        )[0] # Choices always returns a list, therefore [0] is added to just get the result
 
     def getCutOff(self, currentMidi) -> tuple[int, int]:
         lower = 0
