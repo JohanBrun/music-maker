@@ -14,7 +14,6 @@ def gen_normal(mu: float, sigma: float, length: int) -> np.array:
     inMidiRange = mu >= 0 and mu <= 127 and length > 0
     if (inMidiRange):
         noise = rng.normal(mu, sigma, length)
-        noise = noise
         noise = np.rint(noise)
         return noise
     else:

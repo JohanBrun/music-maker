@@ -19,7 +19,7 @@ class ChordGraph:
         self.ts = ts
             
     def getNextChord(self, chordName: str) -> str:
-        return random.choice(self.chordDict[chordName][2])
+        return random.choice(self.chordDict[chordName][1])
 
     def generateFourChordProgression(self) -> list[str]:
         initialChord = random.choice(['I', 'iim', 'iiim', 'IV', 'V', 'vim'])
@@ -32,11 +32,11 @@ class ChordGraph:
 
     def generateChord(self, chordName: str, quarterLength: int) -> chord.Chord:
         notesInChord = []
-        bottomNote = True
+        rootNote = True
         for p in self.k.pitchesFromScaleDegrees(self.chordDict[chordName][0]):
             n = note.Note(p)
-            n.octave = 3 if bottomNote else 4
-            bottomNote = False
+            n.octave = 3 if rootNote else 4
+            rootNote = False
             notesInChord.append(n)
         c = chord.Chord(notesInChord, quarterLength=quarterLength)
         c.insertLyric(chordName)

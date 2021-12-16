@@ -31,14 +31,14 @@ class MelodyGraph:
         [0.1, 0.10, 0.34, 0.85, 0.05, 0.50, 0.20, 0.10, 0.1],
     ]
 
-    durationsValues = [1, 0.5, 2, 1.5]
-    durationsValuesWeights = [8, 2, 2, 1]
+    durationValues = [1, 0.5, 2, 1.5]
+    durationValuesWeights = [8, 2, 2, 1]
 
     def __init__(self, ks: key.KeySignature, ts: meter.TimeSignature) -> None:
         self.ks = ks
         self.ts = ts
 
-    def generateMidiValuesFromMarkovModel(self, numMeasures) -> tuple[list[int], list[int]]:
+    def generateMidiValuesFromMarkovModel(self, numMeasures: int, interpolate: bool = False) -> tuple[list[int], list[int]]:
         k = self.ks.asKey()
         midiValues: list[int] = []
         durationValues: list[int] = []
@@ -57,41 +57,59 @@ class MelodyGraph:
             currentDegree = k.getScaleDegreeFromPitch(pitch.Pitch(currentMidi), comparisonAttribute='pitchClass')
 
             midiValues.append(currentMidi)
-            durationValues.append(1)
+            durationValues.append(d)
+        midiValues = midiValues[:numMeasures] if interpolate else midiValues
         return midiValues, durationValues
 
-    def generateNotesFromMidi(self, midiValues: list[int], durationsValuesValues: list[int], numMeasures: int) -> stream.Stream:
-        assert len(midiValues) == len(durationsValuesValues)
+    def generateMidiValuesFromUniform(self, numMeasures: int, interpolationRate: int = 1) -> list[int]:
+        midiValues = []
+        for i in range(numMeasures):
+            n = util.noteInKeyFromMidiValue(random.randint(67, 77), self.ks)
+            midiValues.append(n.pitch.midi)
+        return midiValues
+
+    def generateMidiValuesFromNormal(self, numMeasures: int, interpolationRate: int = 1) -> list[int]:
+        normalValues = util.gen_normal(72, 2, numMeasures)
+        midiValues = []
+        for mv in normalValues:
+            n = util.noteInKeyFromMidiValue(mv, self.ks)
+            midiValues.append(n.pitch.midi)
+        return midiValues
+
+    def generateNotesFromMidi(self, midiValues: list[int], durationValues: list[int], numMeasures: int) -> stream.Stream:
+        assert len(midiValues) == len(durationValues)
         s = stream.Stream()
         s.keySignature = self.ks
         s.timeSignature = self.ts
         s.insert(0, dynamics.Dynamic(0.75))
         while (s.duration.quarterLength < numMeasures * self.ts.numerator):
-            for midi, d in zip(midiValues, durationsValuesValues):
+            for midi, d in zip(midiValues, durationValues):
                 n = util.noteInKeyFromMidiValue(midi, self.ks)
                 n.duration = duration.Duration(d)
                 s.append(n)
         return s
 
-    def interpolateMelody(self, midiValues: list[int], interpolationRate: int):
+    def interpolateMelody(self, midiValues: list[int]):
         k = self.ks.asKey()
         interpolatedMidiValues = []
-        durationsValues = []
+        durationValues = []
         currentInterval = 0
-
         for m in midiValues:
+            rythmSum = self.ts.numerator
+            d, rythmSum = self.getDuration(rythmSum)
             interpolatedMidiValues.append(m)
-            durationsValues.append(1)
+            durationValues.append(d)
             currentMidi = m
-
-            for i in range(interpolationRate-1):
+            while(rythmSum > 0):
                 currentDegree = k.getScaleDegreeFromPitch(pitch.Pitch(currentMidi), comparisonAttribute='pitchClass')
                 currentInterval = self.getIntervalFromWeightedGraph(currentDegree, currentInterval, currentMidi)
                 currentMidi = currentMidi + currentInterval
                 interpolatedMidiValues.append(currentMidi)
-                durationsValues.append(1)
-                
-        return interpolatedMidiValues, durationsValues
+
+                d, rythmSum = self.getDuration(rythmSum)
+                durationValues.append(d)
+
+        return interpolatedMidiValues, durationValues
             
     def getIntervalFromWeightedGraph(self, currentDegree: int, currentInterval: int, currentMidi: int) -> int:
         weightIndex = self.indexDict[currentInterval]
@@ -110,7 +128,7 @@ class MelodyGraph:
         return lower, upper
 
     def getDuration(self, sum: int) -> tuple[float, float]:
-        c = random.choices(population=self.durationsValues, weights=self.durationsValuesWeights)[0]
+        c = random.choices(population=self.durationValues, weights=self.durationValuesWeights)[0]
         sum -= c
         if sum < 0:
             c += sum
