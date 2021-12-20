@@ -33,7 +33,10 @@ class ChordGraph:
     def generateChord(self, chordName: str, quarterLength: int) -> chord.Chord:
         notesInChord = []
         rootNote = True
+        print('new chord')
+        print(self.chordDict[chordName[0]])
         for p in self.k.pitchesFromScaleDegrees(self.chordDict[chordName][0]):
+            print(p)
             n = note.Note(p)
             n.octave = 3 if rootNote else 4
             rootNote = False
